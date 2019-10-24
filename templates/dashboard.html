@@ -53,12 +53,23 @@
 		  cursor: pointer;
 		}
 	</style>
+	
+	<script>
+		async function requestService (id_user) {
+			let response = await fetch('/create-request-service/' + id_user, {
+				method: 'GET'
+		    });
+			
+			let result = await response.json();
+			window.location.href = result;
+		}
+	</script>
 </head>
 
 <body>
 	<div class="dash-page ">
 		<div class="container-btn">
-			<a href="/request/{{id_user}}"><button>Solicitar</button></a>
+			<button onclick="requestService({{id_user}})">Solicitar</button>
 			<a href="/donate/{{id_user}}"><button>Doar</button></a>
 		</div>	
 	</div>

@@ -42,12 +42,13 @@ def request_service(user_id):
 	stores = StoreService().get_all_store()
 	user_name = UserService().get_name_user(user_id)
 	managers = UserService().get_all_manager()
-	
-	ServiceTranfService().create_request_service(user_id)
-	
 	delivery = ServiceTranfService().get_request_service(user_id)
 	
 	return render_template("main.html", stores = stores, user_name = user_name, delivery = delivery, managers = managers, type = 'request')
+
+@app.route("/create-request-service/<user_id>", methods=['GET'])
+def create_request_service(user_id):
+	return ServiceTranfService().create_request_service(user_id)
 	
 @app.route("/confirm-request-service", methods=['POST'])
 def confirm_request_service():
@@ -187,6 +188,12 @@ class ServiceTranfService:
 		
 		with Database() as data_base:
 			data_base.execute("INSERT INTO service (store_id_collect, manager_collect_user_id) values (%s, %s)", (store_id, user_id))
+			
+		return app.response_class(
+			response=json.dumps('/request/' + user_id),
+			status=200,
+			mimetype='application/json'
+		)	
 	
 	@staticmethod
 	def update_request_service(service_id, store_id, manager_id, service_type):
