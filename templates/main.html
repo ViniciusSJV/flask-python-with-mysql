@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Agile</title>
+	
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<style>
+		@import url(https://fonts.googleapis.com/css?family=Roboto:300);
+		body {
+			padding: 10px 20px;
+			border: 1px solid #ccc;
+			max-width: 620px;
+			margin: 0 auto;
+			margin-top: 20px;
+			margin-bottom: 20px;
+			font-family: "Roboto", sans-serif;
+			-webkit-font-smoothing: antialiased;
+			-moz-osx-font-smoothing: grayscale;      
+		}
+		
+		@media only screen and (max-width: 600px) {
+		  body {
+			margin: 0px;
+		  }
+		  h2 {
+			margin-top: 30px;
+		  }
+		}
+		
+		h2 {
+			text-align: center;
+		}
+		h4 {
+			margin: 0;
+			margin-bottom: 5px;
+		}
+		p{
+			margin: 0;
+		}
+		.border > h4 {
+			margin-bottom: 10px;
+			text-decoration: underline;
+		}
+		label {
+			font-size: 14px;
+			font-weight: 600;
+		}
+		.separate {
+			margin-bottom: 25px;
+		}
+		.separate.border {
+			border: 1px solid #ccc;
+			padding: 15px;
+			margin-bottom: 25px;
+		}
+		input, select {
+			display: block;
+			width: calc(100% - 24px);
+			height: 20px;
+			padding: 6px 12px;
+			font-size: 14px;
+			line-height: 1.42857143;
+			color: #555;
+			background-color: #fff;
+			background-image: none;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+			-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+			box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+			-webkit-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+			transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+		}
+		
+		select {
+			width: 100% !important;
+			height: 35px !important;
+		}
+		
+		#number-danfes > input {
+			margin-bottom: 15px;
+		}
+		
+		button {
+			display: inline-block;
+			margin-bottom: 0;
+			font-weight: 400;
+			text-align: center;
+			vertical-align: middle;
+			cursor: pointer;
+			background-image: none;
+			border: 1px solid transparent;
+			white-space: nowrap;
+			padding: 6px 12px;
+			font-size: 10px;
+			line-height: 1.42857143;
+			border-radius: 4px;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+		}
+		
+		button.ok {
+			background-color: #4CAF50;
+			color: white;
+			border: 1px solid #8BC34A;			
+		}
+		
+		button.remove {
+			background-color: #fa5c2bd9;
+			color: white;
+			border: 1px solid #ff5722a6;
+		}
+	</style>
+	
+	<style>
+		.container {
+		  display: block;
+		  line-height: 25px;
+		  position: relative;
+		  padding-left: 35px;
+		  margin-bottom: 12px;
+		  cursor: pointer;
+		  font-size: 15px;
+		  font-weight: 100;
+		  -webkit-user-select: none;
+		  -moz-user-select: none;
+		  -ms-user-select: none;
+		  user-select: none;
+		}
+
+		.container input {
+		  position: absolute;
+		  opacity: 0;
+		  cursor: pointer;
+		}
+
+		.checkmark {
+		  position: absolute;
+		  top: 0;
+		  left: 0;
+		  height: 25px;
+		  width: 25px;
+		  background-color: #eee;
+		  border-radius: 50%;
+		}
+
+		.container:hover input ~ .checkmark {
+		  background-color: #ccc;
+		}
+
+		.container input:checked ~ .checkmark {
+		  background-color: #4CAF50;
+		}
+
+		.checkmark:after {
+		  content: "";
+		  position: absolute;
+		  display: none;
+		}
+
+		.container input:checked ~ .checkmark:after {
+		  display: block;
+		}
+
+		.container .checkmark:after {
+			left: 9px;
+			top: 5px;
+			width: 5px;
+			height: 9px;
+			border: solid white;
+			border-width: 0 3px 3px 0;
+			-webkit-transform: rotate(45deg);
+			-ms-transform: rotate(45deg);
+			transform: rotate(45deg);
+		}
+		</style>
+	
+	<script>
+		function addDanfe () {
+			const numberDanfes = document.querySelector('#number-danfes');
+			if (numberDanfes.lastElementChild) 
+				numberDanfes.lastElementChild.insertAdjacentHTML('afterend', '<input type="number" />');
+			else
+				numberDanfes.insertAdjacentHTML('afterbegin', '<input type="number" />');
+		}		
+		
+		function removeLastDanfe () {
+			const numberDanfes = document.querySelector('#number-danfes');
+			numberDanfes.lastElementChild.remove();
+		}
+		
+		function changeStoreDelivery (element) {
+			let option = element.options[element.selectedIndex];
+			
+			const doc = option.dataset.doc;
+			const end = option.dataset.end;
+			
+			document.querySelector('#delivery_doc').value = doc == undefined ? '' : doc;
+			document.querySelector('#delivery_end').value = end == undefined ? '' : end;
+		}
+		
+		function changeStoreCollect (element) {
+			let option = element.options[element.selectedIndex];
+			
+			const doc = option.dataset.doc;
+			const end = option.dataset.end;
+			
+			document.querySelector('#collect_doc').value = doc == undefined ? '' : doc;
+			document.querySelector('#collect_end').value = end == undefined ? '' : end;
+		}
+	</script>
+
+</head>
+
+<body>
+	<span style="float: right;padding-top: 5px;">{{user_name}}</span>
+	<div>
+		<h2>Sistema de transferencia entre lojas</h2>
+		
+		<div class="separate">
+			<h4>Numero da coleta:</h4>
+			<p>{{user_name}}</p>
+		</div>
+		
+		<div class="separate">
+			<h4>Selecione o tipo de serviço:</h4>
+			<label class="container">Entrega expressa (Prazo de 2h para atendimento)
+			  <input type="radio" checked="checked" name="radio" />
+			  <span class="checkmark"></span>
+			</label>
+			<label class="container">Entrega convencional (Prazo de 24h para atendimento)
+			  <input type="radio" name="radio" />
+			  <span class="checkmark"></span>
+			</label>
+		</div>
+		
+		<div class="separate border">
+			<h4>Dados da coleta</h4>
+			<div>
+				<div style="margin: 5px 0px;"><label>Loja :</label></div>
+				<select id="store_collect" onchange="changeStoreCollect(this);">
+					<option id="" value="">Selecione a loja: </option>
+					{% for store in stores %}
+						<option value="{{store.id}}" data-doc="{{store.document}}" data-end="{{store.end}}">
+							Loja: {{store.name}}
+						</option>
+					{% endfor %}
+				</select>
+			</div>	
+			<div>
+				<div style="margin: 5px 0px;"><label>CNPJ :</label></div>
+				<input id="collect_doc" type="text" readonly />
+			</div>	
+			<div>
+				<div style="margin: 5px 0px;"><label>Endereço :</label></div>
+				<input id="collect_end" type="text" />
+			</div>	
+			<div>
+				<div style="margin: 5px 0px;"><label>Nome gerente :</label></div>
+				<input type="text" readonly />
+			</div>	
+		</div>
+		
+		<div class="separate border">
+			<h4>Colocar aqui as chaves das Danfes</h4>
+			<div id="number-danfes">
+				<input type="number" />
+			</div>	
+			<div>
+				<button onclick="addDanfe();" class="ok">Adicionar</button>
+				<button onclick="removeLastDanfe();" class="remove">Remover</button>
+			</div>
+		</div>
+		
+		<div class="separate border">
+			<h4>Dados da entrega</h4>
+			<div>
+				<div style="margin: 5px 0px;"><label>Loja :</label></div>
+				<select id="store_delivery" onchange="changeStoreDelivery(this);">
+					<option id="" value="">Selecione a loja: </option>
+					{% for store in stores %}
+						<option value="{{store.id}}" data-doc="{{store.document}}" data-end="{{store.end}}">
+							Loja: {{store.name}}
+						</option>
+					{% endfor %}
+				</select>
+			</div>	
+			<div>
+				<div style="margin: 5px 0px;"><label>CNPJ :</label></div>
+				<input id="delivery_doc" type="text" value="" readonly />
+			</div>	
+			<div>
+				<div style="margin: 5px 0px;"><label>Endereço :</label></div>
+				<input id="delivery_end" type="text" value="" readonly />
+			</div>	
+			<div>
+				<div style="margin: 5px 0px;"><label>Nome gerente :</label></div>
+				<input type="text" value="João Vinicius" readonly />
+			</div>	
+		</div>
+		
+		<div style="text-align: end;">
+			<button style="font-size: 14px;" onclick="" class="ok">Solicitar</button>
+			<button style="font-size: 14px;" onclick="" class="ok">Doar</button>
+		</div>
+
+	</div>
+</body>	
