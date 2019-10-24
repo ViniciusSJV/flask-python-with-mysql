@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Agile</title>
+	
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<style>
+		@import url(https://fonts.googleapis.com/css?family=Roboto:300);
+		
+		body {
+		  background: #8e9aa0; 
+		  background: -webkit-linear-gradient(right, #8e9aa0, #607D8B);
+		  background: -moz-linear-gradient(right, #8e9aa0, #607D8B);
+		  background: -o-linear-gradient(right, #8e9aa0, #607D8B);
+		  background: linear-gradient(to left, #8e9aa0, #607D8B);
+		  font-family: "Roboto", sans-serif;
+		  -webkit-font-smoothing: antialiased;
+		  -moz-osx-font-smoothing: grayscale;      
+		}
+		
+		.dash-page {
+			width: 360px;
+			padding: 8% 0 0;
+			margin: auto;
+		}
+		
+		.container-btn{
+			position: relative;
+			z-index: 1;
+			background: #FFFFFF;
+			max-width: 360px;
+			margin: 0 auto 100px;
+			padding: 45px;
+			text-align: center;
+			box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+		}
+		
+		button {
+		  font-family: "Roboto", sans-serif;
+		  text-transform: uppercase;
+		  outline: 0;
+		  background: #4CAF50;
+		  width: 100%;
+		  border: 0;
+		  margin-bottom: 10px;
+		  padding: 15px;
+		  color: #FFFFFF;
+		  font-size: 14px;
+		  -webkit-transition: all 0.3 ease;
+		  transition: all 0.3 ease;
+		  cursor: pointer;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="dash-page ">
+		<div class="container-btn">
+			<a href="/request/{{id_user}}"><button>Solicitar</button></a>
+			<a href="/donate/{{id_user}}"><button>Doar</button></a>
+		</div>	
+	</div>
+</body>	
+		

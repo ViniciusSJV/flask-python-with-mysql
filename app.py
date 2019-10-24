@@ -1,3 +1,4 @@
+import json
 from flask import Flask, render_template, request, json
 from flask_mysqldb import MySQL
 
@@ -32,9 +33,42 @@ def confirm():
 	
 	return UserService().try_register_user(newPassword, confirmPassword, idUser)
 	
-@app.route("/main/<id>", methods=['GET'])
-def main(id):
-	return render_template("main.html", stores = StoreService().get_all_store(), user_name = UserService().get_name_user(id))
+@app.route("/dashboard/<id_user>", methods=['GET'])
+def dashboard(id_user):
+    return render_template("dashboard.html", id_user = id_user)	
+	
+@app.route("/request/<user_id>", methods=['GET'])
+def request_service(user_id):
+	stores = StoreService().get_all_store()
+	user_name = UserService().get_name_user(user_id)
+	managers = UserService().get_all_manager()
+	
+	ServiceTranfService().create_request_service(user_id)
+	
+	delivery = ServiceTranfService().get_request_service(user_id)
+	
+	return render_template("main.html", stores = stores, user_name = user_name, delivery = delivery, managers = managers, type = 'request')
+	
+@app.route("/confirm-request-service", methods=['POST'])
+def confirm_request_service():
+	content = request.get_json()
+	
+	service_id = content['service_id']
+	store_id = content['store_id']
+	manager_id = content['manager_id']
+	service_type = content['service_type']
+	
+	return ServiceTranfService().update_request_service(service_id, store_id, manager_id, service_type)
+	
+@app.route("/donate/<user_id>", methods=['GET'])
+def donate_service(user_id):
+	stores = StoreService().get_all_store()
+	user_name = UserService().get_name_user(user_id)
+	managers = UserService().get_all_manager()
+	
+	delivery = ServiceTranfService().get_donate_service(user_id)
+	
+	return render_template("main.html", stores = stores, user_name = user_name, delivery = delivery, managers = managers, type = 'donate')	
 
 class UserService:
 
@@ -63,7 +97,7 @@ class UserService:
 				)
 			else:
 				response = app.response_class(
-					response=json.dumps('/main/' + id),
+					response=json.dumps('/dashboard/' + id),
 					status=200,
 					mimetype='application/json'
 				)
@@ -77,7 +111,7 @@ class UserService:
 				data_base.execute("UPDATE auth_user SET password=%s, password_change=1 where id=%s", (newPassword, idUser))
 			
 			response = app.response_class(
-				response=json.dumps('/main/' + idUser),
+				response=json.dumps('/dashboard/' + idUser),
 				status=200,
 				mimetype='application/json'
 			)
@@ -99,11 +133,20 @@ class UserService:
 		return str(result[0])
 		
 	@staticmethod
-	def get_all_manager(idUser):		
+	def get_store_user(idUser):	
+		
+		with Database() as data_base:
+			data_base.execute("SELECT store_id FROM auth_user where id=%s", (idUser))
+			result = data_base.fetchone()
+		
+		return str(result[0])	
+		
+	@staticmethod
+	def get_all_manager():		
 		response = list()
 		
 		with Database() as data_base:
-			data_base.execute("SELECT * FROM auth_user where id!=%s", (idUser))
+			data_base.execute("SELECT * FROM auth_user")
 			result = data_base.fetchall()
 		
 		for row in result:
@@ -132,6 +175,50 @@ class StoreService:
 				'end': 'Rua: ' + str(row[3]) + ' ' + str(row[9]) + ' - ' + str(row[5]) + '/' + str(row[6]),
 				'document': row[2] 
 			})
+			
+		return response		
+		
+class ServiceTranfService:
+	
+	@staticmethod
+	def create_request_service(user_id):
+	
+		store_id = UserService().get_store_user(user_id)
+		
+		with Database() as data_base:
+			data_base.execute("INSERT INTO service (store_id_collect, manager_collect_user_id) values (%s, %s)", (store_id, user_id))
+	
+	@staticmethod
+	def update_request_service(service_id, store_id, manager_id, service_type):
+	
+		with Database() as data_base:
+			data_base.execute("UPDATE service SET store_id_delivery = %s, manager_delivery_user_id = %s,  service_type = %s WHERE service_id = %s", (store_id, manager_id, service_type, service_id))
+			
+		return app.response_class(
+			response=json.dumps('Solicitacao enviada'),
+			status=200,
+			mimetype='application/json'
+		)	
+	
+	@staticmethod
+	def get_request_service(user_id):
+		response = list()
+		
+		store_id = UserService().get_store_user(user_id)
+		
+		with Database() as data_base:
+			data_base.execute("SELECT a.*, b.service_type, c.username, b.service_id FROM store AS a INNER JOIN service AS b ON b.store_id_collect = a.store_id INNER JOIN auth_user AS c on b.manager_collect_user_id = c.id WHERE b.store_id_collect=%s", (store_id,))
+			result = data_base.fetchone()
+			
+		response = {
+			'id': result[0],
+			'name': result[1],
+			'end': 'Rua: ' + result[3] + ' ' + str(result[9]) + ' - ' + result[5] + '/' + result[6],
+			'document': result[2],
+			'service_type': str(result[11]),
+			'manager': str(result[12]),
+			'service_id': str(result[13])
+		}
 			
 		return response		
 	

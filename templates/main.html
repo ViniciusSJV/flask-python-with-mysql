@@ -113,6 +113,10 @@
 			color: white;
 			border: 1px solid #ff5722a6;
 		}
+		
+		select option[disabled] {
+			display: none;
+		}
 	</style>
 	
 	<style>
@@ -179,6 +183,42 @@
 		</style>
 	
 	<script>
+	
+		async function requestService() {
+			const storeCollect = document.querySelector('#store_collect');
+			const storeCollectOption = storeCollect.options[storeCollect.selectedIndex];
+			if (storeCollectOption.value == '') {
+				alert('Selecione uma loja');
+				return;
+			}	
+			const store_id = storeCollectOption.value;
+			
+			const collectManager = document.querySelector('#collect_manager');
+			const collectManagerOption = collectManager.options[collectManager.selectedIndex];
+			if (collectManagerOption.value == '') {
+				alert('Selecione o gerente da loja');
+				return;
+			}	
+			const manager_id = collectManagerOption.value;
+			
+			const service_id = document.querySelector('#serviceId').textContent;
+			
+			const service_type = document.querySelector('input[name = "serviceType"]:checked').value;
+		
+			let response = await fetch('/confirm-request-service', {
+				method: 'POST',
+				headers: {
+				  'Accept': 'application/json',
+				  'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({'service_id': service_id, 'store_id': store_id, 'manager_id': manager_id, 'service_type': service_type})
+		    });
+
+			let result = await response.json();
+			
+			alert(result);
+		}
+	
 		function addDanfe () {
 			const numberDanfes = document.querySelector('#number-danfes');
 			if (numberDanfes.lastElementChild) 
@@ -192,24 +232,36 @@
 			numberDanfes.lastElementChild.remove();
 		}
 		
-		function changeStoreDelivery (element) {
-			let option = element.options[element.selectedIndex];
-			
-			const doc = option.dataset.doc;
-			const end = option.dataset.end;
-			
-			document.querySelector('#delivery_doc').value = doc == undefined ? '' : doc;
-			document.querySelector('#delivery_end').value = end == undefined ? '' : end;
-		}
-		
 		function changeStoreCollect (element) {
 			let option = element.options[element.selectedIndex];
 			
+			const store_id = option.value;
 			const doc = option.dataset.doc;
 			const end = option.dataset.end;
 			
 			document.querySelector('#collect_doc').value = doc == undefined ? '' : doc;
 			document.querySelector('#collect_end').value = end == undefined ? '' : end;
+			
+			let selectManagerOptions = document.querySelector('#collect_manager').options;
+			
+			[].forEach.call(selectManagerOptions, function(option) {
+                if (option.dataset.store == store_id){
+					option.disabled = false;
+				} else {
+					option.disabled = true;
+				} 
+				
+				if(option.selected)
+					option.selected = false;
+            });
+		}
+		
+		function clearSelected(){
+			let elements = document.querySelector('#collect_manager').options;
+			for(var i = 0; i < elements.length; i++){
+			  if(elements[i].selected)
+				elements[i].selected = false;
+			}
 		}
 	</script>
 
@@ -218,21 +270,21 @@
 <body>
 	<span style="float: right;padding-top: 5px;">{{user_name}}</span>
 	<div>
-		<h2>Sistema de transferencia entre lojas</h2>
+		<h2>Sistema de transferência entre lojas</h2>
 		
 		<div class="separate">
 			<h4>Numero da coleta:</h4>
-			<p>{{user_name}}</p>
+			<p id="serviceId">{{delivery.service_id}}</p>
 		</div>
 		
 		<div class="separate">
 			<h4>Selecione o tipo de serviço:</h4>
 			<label class="container">Entrega expressa (Prazo de 2h para atendimento)
-			  <input type="radio" checked="checked" name="radio" />
+			  <input type="radio" checked="checked" name="serviceType" value="EXPRESS">
 			  <span class="checkmark"></span>
 			</label>
 			<label class="container">Entrega convencional (Prazo de 24h para atendimento)
-			  <input type="radio" name="radio" />
+			  <input type="radio" name="serviceType" value="CONVENTIONAL">
 			  <span class="checkmark"></span>
 			</label>
 		</div>
@@ -260,7 +312,14 @@
 			</div>	
 			<div>
 				<div style="margin: 5px 0px;"><label>Nome gerente :</label></div>
-				<input type="text" readonly />
+				<select id="collect_manager">
+					<option id="" value="">Selecione o gerente: </option>
+					{% for manager in managers %}
+						<option value="{{manager.id}}" data-store="{{manager.store_id}}">
+							{{manager.name}}
+						</option>
+					{% endfor %}
+				</select>
 			</div>	
 		</div>
 		
@@ -279,32 +338,24 @@
 			<h4>Dados da entrega</h4>
 			<div>
 				<div style="margin: 5px 0px;"><label>Loja :</label></div>
-				<select id="store_delivery" onchange="changeStoreDelivery(this);">
-					<option id="" value="">Selecione a loja: </option>
-					{% for store in stores %}
-						<option value="{{store.id}}" data-doc="{{store.document}}" data-end="{{store.end}}">
-							Loja: {{store.name}}
-						</option>
-					{% endfor %}
-				</select>
+				<input id="store_delivery" type="text" value="{{delivery.name}}" readonly />
 			</div>	
 			<div>
 				<div style="margin: 5px 0px;"><label>CNPJ :</label></div>
-				<input id="delivery_doc" type="text" value="" readonly />
+				<input id="delivery_doc" type="text" value="{{delivery.document}}" readonly />
 			</div>	
 			<div>
 				<div style="margin: 5px 0px;"><label>Endereço :</label></div>
-				<input id="delivery_end" type="text" value="" readonly />
+				<input id="delivery_end" type="text" value="{{delivery.end}}" readonly />
 			</div>	
 			<div>
 				<div style="margin: 5px 0px;"><label>Nome gerente :</label></div>
-				<input type="text" value="João Vinicius" readonly />
+				<input type="text" value="{{delivery.manager}}" readonly />
 			</div>	
 		</div>
 		
 		<div style="text-align: end;">
-			<button style="font-size: 14px;" onclick="" class="ok">Solicitar</button>
-			<button style="font-size: 14px;" onclick="" class="ok">Doar</button>
+			<button style="font-size: 14px;" onclick="requestService()" class="ok">Solicitar</button>
 		</div>
 
 	</div>
