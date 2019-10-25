@@ -190,7 +190,7 @@ class StoreService:
 			response.append({
 				'id': row[0],
 				'name': row[1],
-				'end': 'Rua: ' + str(row[3]) + ' ' + str(row[9]) + ' - ' + str(row[5]) + '/' + str(row[6]),
+				'end': str(row[3]) + ' ' + str(row[9]) + ' - ' + str(row[5]) + '/' + str(row[6]),
 				'document': row[2] 
 			})
 			
@@ -245,10 +245,10 @@ class ServiceTranfService:
 			'service_type': str(result[1]),
 			'delivery_name': str(result[2]),
 			'delivery_document': str(result[3]),
-			'delivery_end': 'Rua: ' + result[4] + ' ' + str(result[5]) + ' - ' + result[6] + '/' + result[7],
+			'delivery_end': result[4] + ' ' + str(result[5]) + ' - ' + result[6] + '/' + result[7],
 			'collect_name': str(result[8]),
 			'collect_codument': str(result[9]),
-			'collect_end': 'Rua: ' + result[10] + ' ' + str(result[11]) + ' - ' + result[12] + '/' + result[13],
+			'collect_end': result[10] + ' ' + str(result[11]) + ' - ' + result[12] + '/' + result[13],
 			'delivery_manager': 'Joao1',
 			'collect_manager': 'Joao2'
 		}
@@ -270,10 +270,10 @@ class ServiceTranfService:
 				'service_type': str(result[1]),
 				'delivery_name': str(result[2]),
 				'delivery_document': str(result[3]),
-				'delivery_end': 'Rua: ' + result[4] + ' ' + str(result[5]) + ' - ' + result[6] + '/' + result[7],
+				'delivery_end': result[4] + ' ' + str(result[5]) + ' - ' + result[6] + '/' + result[7],
 				'collect_name': str(result[8]),
 				'collect_codument': str(result[9]),
-				'collect_end': 'Rua: ' + result[10] + ' ' + str(result[11]) + ' - ' + result[12] + '/' + result[13],
+				'collect_end': result[10] + ' ' + str(result[11]) + ' - ' + result[12] + '/' + result[13],
 				'delivery_manager': 'Joao1',
 				'collect_manager': 'Joao2'
 			})
@@ -305,7 +305,7 @@ class ServiceTranfService:
 		response = {
 			'id': result[0],
 			'delivery_name': result[1],
-			'delivery_end': 'Rua: ' + result[3] + ' ' + str(result[9]) + ' - ' + result[5] + '/' + result[6],
+			'delivery_end': result[3] + ' ' + str(result[9]) + ' - ' + result[5] + '/' + result[6],
 			'delivery_document': result[2],
 			'service_type': str(result[11]),
 			'delivery_manager': str(result[12]),
