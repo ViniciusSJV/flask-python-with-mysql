@@ -185,7 +185,7 @@
 	<script>
 		{% if type == 'request' %}
 		
-		async function requestService() {
+		async function requestService(user_id) {
 			const storeCollect = document.querySelector('#store_collect');
 			const storeCollectOption = storeCollect.options[storeCollect.selectedIndex];
 			if (storeCollectOption.value == '') {
@@ -199,7 +199,7 @@
 			if (collectManagerOption.value == '') {
 				alert('Selecione o gerente da loja');
 				return;
-			}	
+			}
 			const manager_id = collectManagerOption.value;
 			
 			const service_id = document.querySelector('#serviceId').textContent;
@@ -212,12 +212,13 @@
 				  'Accept': 'application/json',
 				  'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({'service_id': service_id, 'store_id': store_id, 'manager_id': manager_id, 'service_type': service_type})
+				body: JSON.stringify({'service_id': service_id, 'store_id': store_id, 'manager_id': manager_id, 'service_type': service_type, 'user_id': user_id})
 		    });
 
-			let result = await response.json();
-			
-			alert(result);
+			let result = await response.json();	
+			alert(result.msg);
+				
+			window.location.href = result.goTo;
 		}
 		
 		{% endif %}
@@ -226,10 +227,13 @@
 		
 		function addDanfe () {
 			const numberDanfes = document.querySelector('#number-danfes');
-			if (numberDanfes.lastElementChild) 
-				numberDanfes.lastElementChild.insertAdjacentHTML('afterend', '<input name="danfe" type="number">');
+			
+			const layout = '<div style="display: flex;align-items: center;margin-bottom: 5px;"><input placeholder="Chave Danfe" style="max-width: 50%;" name="danfe" type="number"><span style="max-width: 10%;margin: 0px 15px;"> - </span><input placeholder="Valor Danfe" style="max-width: 40%;" name="value" type="number"></div>';
+			
+			if (numberDanfes.lastElementChild)
+				numberDanfes.lastElementChild.insertAdjacentHTML('afterend', layout);
 			else
-				numberDanfes.insertAdjacentHTML('afterbegin', '<input name="danfe" type="number">');
+				numberDanfes.insertAdjacentHTML('afterbegin', layout);
 		}		
 		
 		function removeLastDanfe () {
@@ -381,9 +385,13 @@
 		{% if type == 'donate' %}
 		<div class="separate border">
 			<h4>Colocar aqui as chaves das Danfes</h4>
-			<form id="number-danfes">
-				<input name="danfe" type="number">
-			</form>	
+			<form style="margin-bottom: 10px;" id="number-danfes">
+				<div style="display: flex;align-items: center;margin-bottom: 5px;">
+					<input placeholder="Chave Danfe" style="max-width: 50%;" name="danfe" type="number">
+					<span style="max-width: 10%;margin: 0px 15px;"> - </span>
+					<input placeholder="Valor Danfe" style="max-width: 40%;" name="value" type="number">
+				</div>
+			</form>
 			<div>
 				<button onclick="addDanfe();" class="ok">Adicionar</button>
 				<button onclick="removeLastDanfe();" class="remove">Remover</button>
@@ -415,7 +423,7 @@
 			{% if type == 'donate' %}
 				<button style="font-size: 14px;" onclick="saveDanfes({{user_id}}, {{service_id}})" class="ok">Doar</button>
 			{% else %}
-				<button style="font-size: 14px;" onclick="requestService()" class="ok">Solicitar</button>
+				<button style="font-size: 14px;" onclick="requestService({{user_id}})" class="ok">Solicitar</button>
 			{% endif %}
 		</div>
 

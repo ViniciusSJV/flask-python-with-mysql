@@ -23,6 +23,7 @@
 		.dash-page {
 			width: 515px;
 			margin: auto;
+			padding: 8% 0 0;
 		}
 		
 		.container{
@@ -46,6 +47,16 @@
 		.inline > div {
 			width: 50%;
 			padding: 0px 10px;
+		}
+		
+		.inline-danfe {
+			display: block;
+			width: 100%;
+		}
+		
+		.inline-danfe > div {
+			padding: 10px 10px;
+			border: 1px solid #607D8B;
 		}
 		
 		button {
@@ -129,7 +140,27 @@
 					</div>	
 				</div>
 			</div>
+			{% if donate.status == 'OPEN' %}
 			<a href="/donate/{{user_id}}/{{donate.service_id}}"><button>Doar</button></a>
+			{% else %}
+			<div class="inline-danfe">
+				<div>
+					<h4 style="margin: 0;margin-bottom: 10px;">Danfes: </h4>
+					{% for danfe in donate.danfes %}
+						<div style="display: flow-root;">
+							<span style="float: left;">
+								<label style="font-weight: 600;">Danfe :</label>
+								<label>{{danfe.key}}</label>
+							</span>
+							<span style="float: right;">							
+								<label style="font-weight: 600;">Valor :</label>
+								<label>{{danfe.value}}</label>
+							</span>	
+						</div>
+					{% endfor %}
+				</div>
+			</div>	
+			{% endif %}
 			{% endfor %}
 		</div>	
 	</div>

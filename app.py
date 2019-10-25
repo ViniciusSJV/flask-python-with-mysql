@@ -41,12 +41,12 @@ def dashboard(id_user):
 	
 @app.route("/request/<user_id>", methods=['GET'])
 def request_service(user_id):
-	stores = StoreService().get_all_store()
+	stores = StoreService().get_all_store(user_id)
 	user_name = UserService().get_name_user(user_id)
 	managers = UserService().get_all_manager()
 	delivery = ServiceTranfService().get_request_service(user_id)
 	
-	return render_template("main.html", stores = stores, user_name = user_name, delivery = delivery, managers = managers, type = 'request')
+	return render_template("main.html", stores = stores, user_name = user_name, delivery = delivery, managers = managers, type = 'request', user_id = user_id,)
 	
 @app.route("/list-donates/<user_id>", methods=['GET'])
 def list_donates(user_id):
@@ -78,13 +78,16 @@ def confirm_request_service():
 	store_id = content['store_id']
 	manager_id = content['manager_id']
 	service_type = content['service_type']
+	user_id = content['user_id']
 	
-	return ServiceTranfService().update_request_service(service_id, store_id, manager_id, service_type)
+	return ServiceTranfService().update_request_service(service_id, store_id, manager_id, service_type, user_id)
 	
 @app.route("/save-danfes/<user_id>/<service_id>", methods=['POST'])
 def save_danfes(user_id, service_id):
 	danfes = request.form.getlist('danfe')
-	return ServiceTranfService().save_danfes(user_id, service_id, danfes)
+	values = request.form.getlist('value')
+
+	return ServiceTranfService().save_danfes(user_id, service_id, danfes, values)
 	
 #CONTROLERS
 	
@@ -180,18 +183,20 @@ class UserService:
 class StoreService:
 
 	@staticmethod
-	def get_all_store():
+	def get_all_store(user_id):
 		response = list()
 		
+		store_id = UserService().get_store_user(user_id)
+		
 		with Database() as data_base:
-			data_base.execute("SELECT * FROM store")
+			data_base.execute("SELECT * FROM store WHERE store_id != %s", (store_id, ))
 			result = data_base.fetchall()
 		
 		for row in result:
 			response.append({
 				'id': row[0],
 				'name': row[1],
-				'end': str(row[3]) + ' ' + str(row[9]) + ' - ' + str(row[5]) + '/' + str(row[6]),
+				'end': row[3] + ' ' + str(row[9]) + ' - ' + row[5] + '/' + row[6],
 				'document': row[2] 
 			})
 			
@@ -205,7 +210,7 @@ class ServiceTranfService:
 		store_id = UserService().get_store_user(user_id)
 		
 		with Database() as data_base:
-			data_base.execute("INSERT INTO service (store_id_collect, manager_collect_user_id) values (%s, %s)", (store_id, user_id))
+			data_base.execute("INSERT INTO service (store_id_collect, manager_collect_user_id, status) values (%s, %s, 'OPEN')", (store_id, user_id))
 			
 		return app.response_class(
 			response=json.dumps('/request/' + user_id),
@@ -243,12 +248,12 @@ class ServiceTranfService:
 			
 		response = {
 			'service_id': result[0],
-			'service_type': str(result[1]),
-			'delivery_name': str(result[2]),
-			'delivery_document': str(result[3]),
+			'service_type': result[1],
+			'delivery_name': result[2],
+			'delivery_document': result[3],
 			'delivery_end': result[4] + ' ' + str(result[5]) + ' - ' + result[6] + '/' + result[7],
-			'collect_name': str(result[8]),
-			'collect_codument': str(result[9]),
+			'collect_name': result[8],
+			'collect_codument': result[9],
 			'collect_end': result[10] + ' ' + str(result[11]) + ' - ' + result[12] + '/' + result[13],
 			'delivery_manager': result[14],
 			'collect_manager': result[15]
@@ -258,37 +263,44 @@ class ServiceTranfService:
 	
 	@staticmethod	
 	def get_all_donate_service_from_store(store_id):
-		
-		with Database() as data_base:
-			data_base.execute("SELECT a.service_id, a.service_type, b.name, b.document, b.street, b.number, b.city, b.state, c.name, c.document, c.street, c.number, c.city, c.state, d.username, e.username FROM service AS a INNER JOIN store AS b ON a.store_id_delivery = b.store_id INNER JOIN store AS c ON a.store_id_collect = c.store_id INNER JOIN auth_user AS d ON a.manager_delivery_user_id = d.id INNER JOIN auth_user AS e ON a.manager_collect_user_id = e.id WHERE a.store_id_delivery=%s", (store_id,))
-			results = data_base.fetchall()
-		
 		response = list()
 		
-		for result in results: 
-			response.append({
-				'service_id': result[0],
-				'service_type': str(result[1]),
-				'delivery_name': str(result[2]),
-				'delivery_document': str(result[3]),
-				'delivery_end': result[4] + ' ' + str(result[5]) + ' - ' + result[6] + '/' + result[7],
-				'collect_name': str(result[8]),
-				'collect_codument': str(result[9]),
-				'collect_end': result[10] + ' ' + str(result[11]) + ' - ' + result[12] + '/' + result[13],
-				'delivery_manager': result[14],
-				'collect_manager': result[15]
-			})
+		with Database() as data_base:
+			data_base.execute("SELECT a.service_id, a.service_type, b.name, b.document, b.street, b.number, b.city, b.state, c.name, c.document, c.street, c.number, c.city, c.state, d.username, e.username, a.status FROM service AS a INNER JOIN store AS b ON a.store_id_delivery = b.store_id INNER JOIN store AS c ON a.store_id_collect = c.store_id INNER JOIN auth_user AS d ON a.manager_delivery_user_id = d.id INNER JOIN auth_user AS e ON a.manager_collect_user_id = e.id WHERE a.store_id_delivery=%s order by a.service_id desc", (store_id,))
+			results = data_base.fetchall()
+			
+			for result in results: 
+			
+				data_base.execute("SELECT danfe_key, value FROM danfe WHERE service_id=%s", (result[0],))
+				results_danfes = data_base.fetchall()
+				
+				danfe_list = [{'key': x[0], 'value': x[1]} for x in results_danfes]
+					
+				response.append({
+					'service_id': result[0],
+					'service_type': result[1],
+					'delivery_name': result[2],
+					'delivery_document': result[3],
+					'delivery_end': result[4] + ' ' + str(result[5]) + ' - ' + result[6] + '/' + result[7],
+					'collect_name': result[8],
+					'collect_codument': result[9],
+					'collect_end': result[10] + ' ' + str(result[11]) + ' - ' + result[12] + '/' + result[13],
+					'delivery_manager': result[14],
+					'collect_manager': result[15],
+					'status': result[16],
+					'danfes': danfe_list
+				})
 			
 		return response	
 	
 	@staticmethod
-	def update_request_service(service_id, store_id, manager_id, service_type):
+	def update_request_service(service_id, store_id, manager_id, service_type, user_id):
 	
 		with Database() as data_base:
 			data_base.execute("UPDATE service SET store_id_delivery = %s, manager_delivery_user_id = %s,  service_type = %s WHERE service_id = %s", (store_id, manager_id, service_type, service_id))
 			
 		return app.response_class(
-			response=json.dumps('Solicitacao enviada'),
+			response=json.dumps({'msg': 'Solicitacao enviada', 'goTo': '/dashboard/' + str(user_id)}),
 			status=200,
 			mimetype='application/json'
 		)	
@@ -308,18 +320,20 @@ class ServiceTranfService:
 			'delivery_name': result[1],
 			'delivery_end': result[3] + ' ' + str(result[9]) + ' - ' + result[5] + '/' + result[6],
 			'delivery_document': result[2],
-			'service_type': str(result[11]),
-			'delivery_manager': str(result[12]),
-			'service_id': str(result[13])
+			'service_type': result[11],
+			'delivery_manager': result[12],
+			'service_id': result[13]
 		}
 			
 		return response	
 	
 	@staticmethod
-	def save_danfes(user_id, service_id, danfes):
+	def save_danfes(user_id, service_id, danfes, values):
 		with Database() as data_base:
-			for danfe in danfes:
-				data_base.execute("INSERT INTO danfe (danfe_key, service_id, user_id) values (%s, %s, %s)", (danfe, int(service_id), int(user_id)))
+			for danfe, value in zip(danfes, values):
+				data_base.execute("INSERT INTO danfe (danfe_key, value, service_id, user_id) values (%s, %s, %s, %s)", (danfe, value, int(service_id), int(user_id)))
+				
+			data_base.execute("UPDATE service SET status = 'FINISH' WHERE service_id = %s", (service_id, ))	
 			
 		return app.response_class(
 			response=json.dumps({'msg': 'Danfes salvas', 'goTo': '/dashboard/' + user_id}),
