@@ -20,6 +20,7 @@ def login():
 def sing_in():
 	name = request.form.get('name')
 	password = request.form.get('password')
+	
 	return UserService().try_login_user(name, password)
 	
 @app.route("/register_password/<id_user>", methods=['GET'])
@@ -237,7 +238,7 @@ class ServiceTranfService:
 	def get_donate_service(service_id):
 		
 		with Database() as data_base:
-			data_base.execute("SELECT a.service_id, a.service_type, b.name, b.document, b.street, b.number, b.city, b.state, c.name, c.document, c.street, c.number, c.city, c.state  FROM service AS a INNER JOIN store AS b ON a.store_id_delivery = b.store_id INNER JOIN store AS c ON a.store_id_collect = c.store_id WHERE a.service_id=%s", (service_id,))
+			data_base.execute("SELECT a.service_id, a.service_type, b.name, b.document, b.street, b.number, b.city, b.state, c.name, c.document, c.street, c.number, c.city, c.state, d.username, e.username FROM service AS a INNER JOIN store AS b ON a.store_id_delivery = b.store_id INNER JOIN store AS c ON a.store_id_collect = c.store_id INNER JOIN auth_user AS d ON a.manager_delivery_user_id = d.id INNER JOIN auth_user AS e ON a.manager_collect_user_id = e.id WHERE a.service_id=%s", (service_id,))
 			result = data_base.fetchone()
 			
 		response = {
@@ -249,8 +250,8 @@ class ServiceTranfService:
 			'collect_name': str(result[8]),
 			'collect_codument': str(result[9]),
 			'collect_end': result[10] + ' ' + str(result[11]) + ' - ' + result[12] + '/' + result[13],
-			'delivery_manager': 'Joao1',
-			'collect_manager': 'Joao2'
+			'delivery_manager': result[14],
+			'collect_manager': result[15]
 		}
 			
 		return response
@@ -259,7 +260,7 @@ class ServiceTranfService:
 	def get_all_donate_service_from_store(store_id):
 		
 		with Database() as data_base:
-			data_base.execute("SELECT a.service_id, a.service_type, b.name, b.document, b.street, b.number, b.city, b.state, c.name, c.document, c.street, c.number, c.city, c.state  FROM service AS a INNER JOIN store AS b ON a.store_id_delivery = b.store_id INNER JOIN store AS c ON a.store_id_collect = c.store_id WHERE a.store_id_delivery=%s", (store_id,))
+			data_base.execute("SELECT a.service_id, a.service_type, b.name, b.document, b.street, b.number, b.city, b.state, c.name, c.document, c.street, c.number, c.city, c.state, d.username, e.username FROM service AS a INNER JOIN store AS b ON a.store_id_delivery = b.store_id INNER JOIN store AS c ON a.store_id_collect = c.store_id INNER JOIN auth_user AS d ON a.manager_delivery_user_id = d.id INNER JOIN auth_user AS e ON a.manager_collect_user_id = e.id WHERE a.store_id_delivery=%s", (store_id,))
 			results = data_base.fetchall()
 		
 		response = list()
@@ -274,8 +275,8 @@ class ServiceTranfService:
 				'collect_name': str(result[8]),
 				'collect_codument': str(result[9]),
 				'collect_end': result[10] + ' ' + str(result[11]) + ' - ' + result[12] + '/' + result[13],
-				'delivery_manager': 'Joao1',
-				'collect_manager': 'Joao2'
+				'delivery_manager': result[14],
+				'collect_manager': result[15]
 			})
 			
 		return response	
