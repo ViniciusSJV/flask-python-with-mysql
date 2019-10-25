@@ -299,7 +299,7 @@ class ServiceTranfService:
 		store_id = UserService().get_store_user(user_id)
 		
 		with Database() as data_base:
-			data_base.execute("SELECT a.*, b.service_type, c.username, b.service_id FROM store AS a INNER JOIN service AS b ON b.store_id_collect = a.store_id INNER JOIN auth_user AS c on b.manager_collect_user_id = c.id WHERE b.store_id_collect=%s", (store_id,))
+			data_base.execute("SELECT a.*, b.service_type, c.username, b.service_id FROM store AS a INNER JOIN service AS b ON b.store_id_collect = a.store_id INNER JOIN auth_user AS c on b.manager_collect_user_id = c.id WHERE b.store_id_collect=%s ORDER BY service_id desc", (store_id,))
 			result = data_base.fetchone()
 			
 		response = {
