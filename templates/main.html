@@ -183,7 +183,8 @@
 		</style>
 	
 	<script>
-	
+		{% if type == 'request' %}
+		
 		async function requestService() {
 			const storeCollect = document.querySelector('#store_collect');
 			const storeCollectOption = storeCollect.options[storeCollect.selectedIndex];
@@ -218,19 +219,40 @@
 			
 			alert(result);
 		}
-	
+		
+		{% endif %}
+		
+		{% if type == 'donate' %}
+		
 		function addDanfe () {
 			const numberDanfes = document.querySelector('#number-danfes');
 			if (numberDanfes.lastElementChild) 
-				numberDanfes.lastElementChild.insertAdjacentHTML('afterend', '<input type="number" />');
+				numberDanfes.lastElementChild.insertAdjacentHTML('afterend', '<input name="danfe" type="number">');
 			else
-				numberDanfes.insertAdjacentHTML('afterbegin', '<input type="number" />');
+				numberDanfes.insertAdjacentHTML('afterbegin', '<input name="danfe" type="number">');
 		}		
 		
 		function removeLastDanfe () {
 			const numberDanfes = document.querySelector('#number-danfes');
 			numberDanfes.lastElementChild.remove();
 		}
+		
+		async function saveDanfes(user_id, service_id) {
+			let danfesForm = document.querySelector("#number-danfes");
+			if (danfesForm) {
+			    let response = await fetch('/save-danfes/' + user_id + '/' + service_id, {
+				   method: 'POST',
+				   body: new FormData(danfesForm)
+			    });
+
+			    let result = await response.json();	
+				alert(result.msg);
+				
+				window.location.href = result.goTo;
+			}
+		}
+		
+		{% endif %}
 		
 		function changeStoreCollect (element) {
 			let option = element.options[element.selectedIndex];
@@ -256,7 +278,7 @@
             });
 		}
 		
-		function clearSelected(){
+		function clearSelected() {
 			let elements = document.querySelector('#collect_manager').options;
 			for(var i = 0; i < elements.length; i++){
 			  if(elements[i].selected)
@@ -277,6 +299,16 @@
 			<p id="serviceId">{{delivery.service_id}}</p>
 		</div>
 		
+		{% if type == 'donate' %}
+		<div class="separate">
+			<h4>Tipo de serviço:</h4>
+			{% if service_type == 'EXPRESS' %}
+			<label>Entrega expressa (Prazo de 2h para atendimento)</label>
+			{% else %}
+			<label>Entrega convencional (Prazo de 24h para atendimento)</label>
+			{% endif %}
+		</div>
+		{% else %}
 		<div class="separate">
 			<h4>Selecione o tipo de serviço:</h4>
 			<label class="container">Entrega expressa (Prazo de 2h para atendimento)
@@ -288,7 +320,29 @@
 			  <span class="checkmark"></span>
 			</label>
 		</div>
+		{% endif %}
 		
+		{% if type == 'donate' %}
+		<div class="separate border">
+			<h4>Dados da coleta</h4>
+			<div>
+				<div style="margin: 5px 0px;"><label>Loja :</label></div>
+				<input id="store_collect" type="text" value="{{delivery.collect_name}}" readonly>
+			</div>	
+			<div>
+				<div style="margin: 5px 0px;"><label>CNPJ :</label></div>
+				<input id="collect_doc" type="text" value="{{delivery.collect_codument}}" readonly>
+			</div>	
+			<div>
+				<div style="margin: 5px 0px;"><label>Endereço :</label></div>
+				<input id="collect_end" type="text" value="{{delivery.collect_end}}" readonly>
+			</div>	
+			<div>
+				<div style="margin: 5px 0px;"><label>Nome gerente :</label></div>
+				<input id="collect_manager" type="text" value="{{delivery.collect_manager}}" readonly>
+			</div>	
+		</div>
+		{% else %}
 		<div class="separate border">
 			<h4>Dados da coleta</h4>
 			<div>
@@ -322,40 +376,47 @@
 				</select>
 			</div>	
 		</div>
+		{% endif %}
 		
+		{% if type == 'donate' %}
 		<div class="separate border">
 			<h4>Colocar aqui as chaves das Danfes</h4>
-			<div id="number-danfes">
-				<input type="number" />
-			</div>	
+			<form id="number-danfes">
+				<input name="danfe" type="number">
+			</form>	
 			<div>
 				<button onclick="addDanfe();" class="ok">Adicionar</button>
 				<button onclick="removeLastDanfe();" class="remove">Remover</button>
 			</div>
 		</div>
+		{% endif %}
 		
 		<div class="separate border">
 			<h4>Dados da entrega</h4>
 			<div>
 				<div style="margin: 5px 0px;"><label>Loja :</label></div>
-				<input id="store_delivery" type="text" value="{{delivery.name}}" readonly />
+				<input id="store_delivery" type="text" value="{{delivery.delivery_name}}" readonly />
 			</div>	
 			<div>
 				<div style="margin: 5px 0px;"><label>CNPJ :</label></div>
-				<input id="delivery_doc" type="text" value="{{delivery.document}}" readonly />
+				<input id="delivery_doc" type="text" value="{{delivery.delivery_document}}" readonly />
 			</div>	
 			<div>
 				<div style="margin: 5px 0px;"><label>Endereço :</label></div>
-				<input id="delivery_end" type="text" value="{{delivery.end}}" readonly />
+				<input id="delivery_end" type="text" value="{{delivery.delivery_end}}" readonly />
 			</div>	
 			<div>
 				<div style="margin: 5px 0px;"><label>Nome gerente :</label></div>
-				<input type="text" value="{{delivery.manager}}" readonly />
+				<input type="text" value="{{delivery.delivery_manager}}" readonly />
 			</div>	
 		</div>
 		
 		<div style="text-align: end;">
-			<button style="font-size: 14px;" onclick="requestService()" class="ok">Solicitar</button>
+			{% if type == 'donate' %}
+				<button style="font-size: 14px;" onclick="saveDanfes({{user_id}}, {{service_id}})" class="ok">Doar</button>
+			{% else %}
+				<button style="font-size: 14px;" onclick="requestService()" class="ok">Solicitar</button>
+			{% endif %}
 		</div>
 
 	</div>

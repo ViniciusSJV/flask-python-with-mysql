@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Agile</title>
+	
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<style>
+		@import url(https://fonts.googleapis.com/css?family=Roboto:300);
+		
+		body {
+		  background: #8e9aa0; 
+		  background: -webkit-linear-gradient(right, #8e9aa0, #607D8B);
+		  background: -moz-linear-gradient(right, #8e9aa0, #607D8B);
+		  background: -o-linear-gradient(right, #8e9aa0, #607D8B);
+		  background: linear-gradient(to left, #8e9aa0, #607D8B);
+		  font-family: "Roboto", sans-serif;
+		  -webkit-font-smoothing: antialiased;
+		  -moz-osx-font-smoothing: grayscale;      
+		}
+		
+		.dash-page {
+			width: 515px;
+			padding: 8% 0 0;
+			margin: auto;
+		}
+		
+		.container{
+			position: relative;
+			z-index: 1;
+			background: #FFFFFF;
+			margin: 0 auto 100px;
+			padding: 20px;
+			box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+		}
+		
+		.inline {
+			display: inline-flex;
+			align-items: center;
+			width: 100%;
+			margin-bottom: 15px;
+			padding-top: 10px;
+			margin-top: 10px;
+			border-top: 1px solid #607D8B;
+		}
+		
+		.inline > div {
+			width: 50%;
+			padding: 0px 10px;
+		}
+		
+		button {
+		  font-family: "Roboto", sans-serif;
+		  text-transform: uppercase;
+		  outline: 0;
+		  background: #4CAF50;
+		  width: 100%;
+		  border: 0;
+		  margin-bottom: 10px;
+		  padding: 15px;
+		  color: #FFFFFF;
+		  box-shadow: 0px 7px 7px -1px #607D8B;
+		  font-size: 14px;
+		  -webkit-transition: all 0.3 ease;
+		  transition: all 0.3 ease;
+		  cursor: pointer;
+		}
+
+	</style>
+	
+	<script>
+		async function getDonate (service_id, user_id) {
+		
+			let response = await fetch('/donate/' + id_user + '/' + service_id, {
+				method: 'GET'
+		    });
+			
+			if (await response.ok) {
+				let result = await response.json();
+
+				window.location.href = result;
+			} else {
+				alert(await response.json());
+			}	
+		}
+	</script>
+</head>
+
+<body>
+	<div class="dash-page ">
+		<div class="container">
+			{% for donate in donates %}
+			<div class="inline">
+				<div>
+					<h4 style="margin: 0;">Dados da coleta</h4>
+					<div>
+						<div style="margin: 5px 0px;"><label>Loja :</label></div>
+						<label>{{donate.collect_name}}</label>
+					</div>	
+					<div>
+						<div style="margin: 5px 0px;"><label>CNPJ :</label></div>
+						<label>{{donate.collect_codument}}</label>
+					</div>	
+					<div>
+						<div style="margin: 5px 0px;"><label>Endereço :</label></div>
+						<label>{{donate.collect_end}}</label>
+					</div>	
+					<div>
+						<div style="margin: 5px 0px;"><label>Nome gerente :</label></div>
+						<label>{{donate.collect_manager}}</label>
+					</div>	
+				</div>
+				<div>
+					<h4 style="margin: 0;">Dados da entrega</h4>
+					<div>
+						<div style="margin: 5px 0px;"><label>Loja :</label></div>
+						<label>{{donate.delivery_name}}<label>
+					</div>	
+					<div>
+						<div style="margin: 5px 0px;"><label>CNPJ :</label></div>
+						<label>{{donate.delivery_document}}<label>
+					</div>	
+					<div>
+						<div style="margin: 5px 0px;"><label>Endereço :</label></div>
+						<label>{{donate.delivery_end}}<label>
+					</div>	
+					<div>
+						<div style="margin: 5px 0px;"><label>Nome gerente :</label></div>
+						<label>{{donate.delivery_manager}}<label>
+					</div>	
+				</div>
+			</div>
+			<a href="/donate/{{user_id}}/{{donate.service_id}}"><button>Doar</button></a>
+			{% endfor %}
+		</div>	
+	</div>
+</body>	
+		

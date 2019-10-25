@@ -124,7 +124,7 @@
 					  const btnSubumit = registerForm[2];
 					  btnSubumit.disabled = true;
 
-					  let response = await fetch('/confirm', {
+					  let response = await fetch('/register', {
 						 method: 'POST',
 						 body: new FormData(registerForm)
 					  });

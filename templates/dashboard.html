@@ -63,6 +63,21 @@
 			let result = await response.json();
 			window.location.href = result;
 		}
+		
+		async function donateService (id_user) {
+		
+			let response = await fetch('/check-donate-service/' + id_user, {
+				method: 'GET'
+		    });
+			
+			if (await response.ok) {
+				let result = await response.json();
+
+				window.location.href = result;
+			} else {
+				alert(await response.json());
+			}	
+		}
 	</script>
 </head>
 
@@ -70,7 +85,7 @@
 	<div class="dash-page ">
 		<div class="container-btn">
 			<button onclick="requestService({{id_user}})">Solicitar</button>
-			<a href="/donate/{{id_user}}"><button>Doar</button></a>
+			<button onclick="donateService({{id_user}})">Doar</button>
 		</div>	
 	</div>
 </body>	
